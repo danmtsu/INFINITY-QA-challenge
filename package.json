@@ -7,7 +7,9 @@
     "cypress": "^12.17.3",
     "start-server-and-test": "^2.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "axios": "^1.4.0"
+  },
   "scripts": {
     "start": "my-server -p 3030",
     "cy:run": "cypress run",

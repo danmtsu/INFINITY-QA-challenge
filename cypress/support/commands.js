@@ -23,3 +23,21 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+import axios from 'axios';
+
+Cypress.Commands.add('getRandomUserData', () => {
+    return axios
+      .get('https://randomuser.me/api/?password=special,upper,lower,number')
+      .then((response) => {
+        const user = response.data.results[0];
+        return {
+          name: `${user.name.first} ${user.name.last}`,
+          email: user.email,
+          password: user.login.password,
+          country: user.location.country,
+          phone: user.phone
+        };
+      });
+  });
+
