@@ -4,19 +4,8 @@ describe('login Forms', () => {
   it('invalid_login', () => {
 
     cy.visit('https://beta.coodesh.com/')
-    cy.contains('Faça login').should('be.visible').wait(5000)
-    cy.window().then((win) => {
-      // Encontrar o botão de aceitar cookies usando JavaScript nativo
-      const btnAceitarCookies = win.document.querySelector('#onetrust-accept-btn-handler') // Substitua pelo seletor correto do botão
-
-      // Verificar se o botão de aceitar cookies foi encontrado corretamente
-      if (btnAceitarCookies) {
-        btnAceitarCookies.click()
-
-      } else {
-       cy.log('O botão de aceitar cookies não foi encontrado.')
-      }
-    })
+    cy.contains('Faça login').should('be.visible')
+    cy.cookiesClosed()
     //verificando o cabeçalho
     cy.get('#menu-button-5').should('be.visible')
     cy.get('img[title="Coodesh: Avalie habilidades de programação com desafios do mundo real"]').should('be.visible')
@@ -68,71 +57,70 @@ describe('login Forms', () => {
     cy.contains('Esqueceu sua senha?').should('be.visible')    
   }),
   it('user_signup', ()=>{
-    cy.visit('https://beta.coodesh.com/auth/signup/users').wait(5000)
-    cy.window().then((win) => {
-      // Encontrar o botão de aceitar cookies usando JavaScript nativo
-      const btnAceitarCookies = win.document.querySelector('#onetrust-accept-btn-handler') // Substitua pelo seletor correto do botão
-
-      // Verificar se o botão de aceitar cookies foi encontrado corretamente
-      if (btnAceitarCookies) {
-        btnAceitarCookies.click()
-
-      } else {
-       cy.log('O botão de aceitar cookies não foi encontrado.')
-      }
-    })
+    cy.visit('https://beta.coodesh.com/auth/signup/users')
+    cy.cookiesClosed()
     // verificando componentes e comportamento dos respectivos
-    cy.get('#tabs-12--tab-0').should('have.attr','aria-selected','true')
-    cy.contains('p','Google').should('be.visible')
-    cy.contains('h1','Cadastre-se').should('be.visible')
-    cy.get('#field-6').should('have.attr','aria-required','true').click()
+    cy.get('#tabs-12--tab-0').should('have.attr','aria-selected','true');
+    cy.contains('p','Google').should('be.visible');
+    cy.contains('h1','Cadastre-se').should('be.visible');
+    cy.get('#field-6').should('have.attr','aria-required','true').click();
     cy.get('#field-6-label').within(()=>{
       cy.get('span[role="presentation"]').should('have.text','*')
-    })
-    cy.get('#field-7').should('have.attr','aria-required','true').click()
-    cy.get('#field-6').should('have.attr','aria-invalid','true')
-    cy.get('#field-6-feedback').should('have.text','Este campo é obrigatório')
-    cy.get('#field-8').should('have.attr','aria-required','true').click()
-    cy.get('#field-7').should('have.attr','aria-invalid','true')
-    cy.get('#field-7-feedback').should('have.text','Este campo é obrigatório')
-    cy.contains('button','Inscreva-se').click()
-    cy.get('#field-8').should('have.attr','aria-invalid','true')
-    cy.get('#field-8-feedback').should('have.text','Este campo é obrigatório')
+    });
+    cy.get('#field-7').should('have.attr','aria-required','true').click();
+    cy.get('#field-6').should('have.attr','aria-invalid','true');
+    cy.get('#field-6-feedback').should('have.text','Este campo é obrigatório');
+    cy.get('#field-8').should('have.attr','aria-required','true').click();
+    cy.get('#field-7').should('have.attr','aria-invalid','true');
+    cy.get('#field-7-feedback').should('have.text','Este campo é obrigatório');
+    cy.contains('button','Inscreva-se').click();
+    cy.get('#field-8').should('have.attr','aria-invalid','true');
+    cy.get('#field-8-feedback').should('have.text','Este campo é obrigatório');
     cy.get('label[for="privacy-gpdr"]').each($div=>{
       cy.wrap($div).within(()=>{
-          cy.contains('a','Política de Privacidade').should('have.attr','href','/privacy')
-          cy.contains('a','Termos e Condições de uso').should('have.attr','href','/terms')
+          cy.contains('a','Política de Privacidade').should('have.attr','href','/privacy');
+          cy.contains('a','Termos e Condições de uso').should('have.attr','href','/terms');
   
       })
-    })
-    cy.contains('button','Inscreva-se').click()
-    cy.get("#privacy-gpdr").should('have.attr','value','false')
-    cy.get("#privacy-gpdr").click({force:true})
-    cy.get("#privacy-gpdr").should('have.attr','value','true')
-    cy.get('#field-6').type(`@#! lima maria`,)
-    cy.get('#field-7').type(`liminhamariaAbraba`)
-    cy.get('#field-7-feedback').should('have.text','Deve ser um email válido')
-    cy.get('#field-8').type(`blablabla`)
-    cy.contains('Inscreva-se').click({force:true})
-    cy.get('#field-8-feedback').should('have.text','Deve conter no mínimo 8 caracteres, 1 número, 1 maiúscula e 1 caractere especial')
-    cy.get('#field-6').clear()
+    });
+    cy.contains('button','Inscreva-se').click();
+    cy.get("#privacy-gpdr").should('have.attr','value','false');
+    cy.get("#privacy-gpdr").click({force:true});
+    cy.get("#privacy-gpdr").should('have.attr','value','true');
+    cy.get('#field-6').type(`@#! lima maria`,);
+    cy.get('#field-7').type(`liminhamariaAbraba`);
+    cy.get('#field-7-feedback').should('have.text','Deve ser um email válido');
+    cy.get('#field-8').type(`blablabla`);
+    cy.contains('Inscreva-se').click({force:true});
+    cy.get('#field-8-feedback').should('have.text','Deve conter no mínimo 8 caracteres, 1 número, 1 maiúscula e 1 caractere especial');
+    cy.get('#field-6').clear();
     cy.getRandomUserData().then((userData)=>{
-      const user = {name: userData.name,
-      email: userData.email,
-      password: userData.password,
-      country: userData.country,
-      phone: userData.phone}
-      cy.get('#field-6').clear().type(`@#! ${user.name}`,)
-      cy.get('#field-7').clear().type(`${user.email}`)
-      cy.get('#field-8').clear().type(`${user.password}`)
+      const user = {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        country: userData.country,
+        phone: userData.phone,
+      };
+      cy.addUserToList(user);
+      cy.get('#field-6').clear().type(`@#! ${user.name}`,); // só pra mostrar que não tem velidação no input de Nome completo
+      cy.get('#field-7').clear().type(`${user.email}`);
+      cy.get('#field-8').clear().type(`${user.password}`);
+      cy.contains('Inscreva-se').click({force:true});
+      cy.intercept('GET','https://api.beta.coodesh.com/lists/companies_dashboard').as('signupRequest')
+      cy.wait('@signupRequest')
+      cy.url().should('eq','https://beta.coodesh.com/onboarding/developer/profile');
     })
-    cy.contains('Inscreva-se').click({force:true})
+  })
 
-
-    
-
-
-
-
+  it('login_successful',()=>{
+    cy.visit('https://beta.coodesh.com/')
+    cy.cookiesClosed()
+    cy.getUserList().then((userList) => {
+      const firstUser = userList[0];
+      cy.get('#field-6').type(`${firstUser.email}`)
+      cy.get('#field-7').type(`${firstUser.password}`)
+      
+    })
   })
 })

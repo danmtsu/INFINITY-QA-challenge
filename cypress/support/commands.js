@@ -26,6 +26,8 @@
 
 import axios from 'axios';
 
+let userList = [];
+
 Cypress.Commands.add('getRandomUserData', () => {
     return axios
       .get('https://randomuser.me/api/?password=special,upper,lower,number')
@@ -41,3 +43,30 @@ Cypress.Commands.add('getRandomUserData', () => {
       });
   });
 
+
+  // Comando personalizado para adicionar um usuário à lista
+Cypress.Commands.add('addUserToList', (user) => {
+  userList.push(user);
+});
+
+// Comando personalizado para retornar a lista de usuários
+Cypress.Commands.add('getUserList', () => {
+  return userList;
+});
+
+
+Cypress.Commands.add('cookiesClosed',()=>{
+    cy.intercept('GET','https://cdn.cookielaw.org/logos/static/ot_guard_logo.svg').as('cookiesClosed')
+    cy.wait('@cookiesClosed').window().then((win) => {
+      // Encontrar o botão de aceitar cookies usando JavaScript nativo
+      const btnAceitarCookies = win.document.querySelector('#onetrust-accept-btn-handler') // Substitua pelo seletor correto do botão
+
+      // Verificar se o botão de aceitar cookies foi encontrado corretamente
+      if (btnAceitarCookies) {
+        btnAceitarCookies.click()
+
+      } else {
+       cy.log('O botão de aceitar cookies não foi encontrado.')
+      }
+    })
+})
