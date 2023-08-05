@@ -4,7 +4,6 @@ import '../support/commands'
 
 describe('login Forms', () => {
   it('invalid_login', () => {
-
     cy.visit('https://beta.coodesh.com/')
     cy.contains('Faça login').should('be.visible')
     cy.cookiesClosed()
@@ -19,7 +18,6 @@ describe('login Forms', () => {
     cy.get('button[value="pt"]').should('have.attr', 'aria-checked','true')
     cy.get('button[value="en"]').should('be.visible')
     cy.get('button[value="es"]').should('be.visible')
-    
     //verificando o formulário
     cy.get('#field-6').should('be.visible')
     cy.get('#field-6').should('have.attr','aria-required','true')
@@ -42,7 +40,6 @@ describe('login Forms', () => {
     Cypress.on('uncaught:exception', (err, runnable) => {
       // returning false here prevents Cypress from
       // failing the test
-      
       return false
     })
     cy.intercept('POST', 'https://api.beta.coodesh.com/auth/signin', {
@@ -60,6 +57,30 @@ describe('login Forms', () => {
   }),
 
 
+  it('signup_and_create_perfil',()=>{
+    cy.visit('https://beta.coodesh.com/auth/signup/users');
+    cy.cookiesClosed()
+    cy.signUpNewUser();
+    cy.getUserList().then((userList)=>{
+      var firstUser = userList[0]
+      cy.completeOnboardingForms(firstUser.phone,firstUser.country)
+    })
+    cy.contains('a','Concluir').should('be.visible').click({force:true})
+    let lista1= ['Alegre','Calculista','Calmo','Enérgico','Estimulante','Frio']
+    let lista2= ['Modesto','Persistente','Persistente','Pretensioso','Introvertido','Inseguro','Barulhento','Anti-social','Arrogante']
+    cy.softSkillsForms(lista1,lista2)
+    cy.visit('https://beta.coodesh.com/account/edit-profile')
+    cy.get('input[type=file]').selectFile({
+      contents: Cypress.Buffer.from('file contents'),
+      fileName: 'curriculo_agora_vai.pdf',
+      lastModified: Date.now()
+    },{force:true}).wait(2500)
+    
+
+
+
+  })
+/*
   it('signup_onboardingForms_Successfull',()=>{
     cy.visit('https://beta.coodesh.com/auth/signup/users')
     cy.signUpNewUser();
@@ -131,9 +152,9 @@ describe('login Forms', () => {
       cy.contains('button','Próximo').click({force:true}).wait(5000)
       cy.get(':nth-child(5) > td > .rc-slider > .rc-slider-step > [style="width: 4px; height: 18px; border-radius: 0px; transform: translateY(9px); left: 33.3333%;"]').click({force:true})
       cy.get(':nth-child(3) > td > .rc-slider > .rc-slider-step > [style="width: 4px; height: 18px; border-radius: 0px; transform: translateY(9px); left: 100%;"]').click({force:true})
-      cy.contains('Enviar').click({force:true}).wait(5000)
-      cy.url().should('eq','https://beta.coodesh.com/onboarding/developer/curriculum').wait(5000)
       cy.intercept('GET','https://api.beta.coodesh.com/fields/users').as('curriculumLoad')
+      cy.contains('Enviar').click({force:true}).wait('@curriculumLoad')
+      cy.url().should('eq','https://beta.coodesh.com/onboarding/developer/curriculum')
       cy.get('.space-bottom-2 > :nth-child(1) > .col-lg-3').contains('QA / Testes').should('be.visible')
       cy.get('.styles_skillsPrint___oa3j > :nth-child(2)').contains('p','GIT').should('be.visible')
       cy.get('.styles_skillsPrint___oa3j > :nth-child(2)').contains('small','Praticante')
@@ -160,13 +181,8 @@ describe('login Forms', () => {
       cy.contains('span','Minha conta').click({force:true})
       cy.contains('span','Meu Painel').click({force:true}).wait(10000)
 
-
-
-      
     })
-  }),
-
-
+  }),*/
   it('user_signup', ()=>{
     cy.visit('https://beta.coodesh.com/auth/signup/users')
     cy.cookiesClosed()
@@ -205,13 +221,6 @@ describe('login Forms', () => {
     cy.contains('Inscreva-se').click({force:true});
     cy.get('#field-8-feedback').should('have.text','Deve conter no mínimo 8 caracteres, 1 número, 1 maiúscula e 1 caractere especial');
     //cy.get('#field-6').clear();
-    cy.getUserList().then((userList)=>{
-      const firstUser = userList[0]
-      cy.get('#field-7').clear().type(`${firstUser.email}`)
-      cy.get('#field-8').clear().type('Infinity$7')
-      cy.contains('Inscreva-se').click({force:true});
-
-    })
     cy.getRandomUserData().then((userData)=>{
       const user = {
         name: userData.name,
@@ -230,14 +239,14 @@ describe('login Forms', () => {
     })
   })
 
-/*
-  it('login_404_successful',()=>{
+
+  it('login_404_successful_with_jobs',()=>{
     cy.visit('https://beta.coodesh.com/dashboard')
     cy.cookiesClosed()
     cy.getUserList().then((userList) => {
       const firstUser = userList[0];
-      cy.get('#field-6').type(`${firstUser.email}`)
-      cy.get('#field-7').type(`${firstUser.password}`)
+      cy.get('#field-6').type(`teste1@teste2.com`)
+      cy.get('#field-7').type(`Daniel12#`)
       cy.intercept('GET','https://api.beta.coodesh.com/lists/companies_dashboard').as('loginRequest')
       cy.contains('Entrar').click({force:true}).wait('@loginRequest');
       cy.url().should('eq','https://beta.coodesh.com/auth/null');
@@ -262,12 +271,34 @@ describe('login Forms', () => {
             cy.get('a[href="/assessments/review"]').within(()=>{
               cy.contains('span','Solicitar Correção').should('be.visible')
             });
-            
 
         })
       });
-
-      
-    })
-  })*/
+      cy.contains('Meu Painel').click({force:true})
+      cy.url().should('eq','https://beta.coodesh.com/dashboard');
+      cy.get(':nth-child(1) > .p-3').contains('Meu Perfil')
+      cy.get(':nth-child(2) > .p-3').contains( 'Desafios')
+      cy.get(':nth-child(3) > .p-3').contains( 'Vagas')
+      cy.get(':nth-child(3) > .p-3').click({force:true})
+      cy.url().should('eq','https://beta.coodesh.com/jobs')
+      cy.get('input[controlid="search"]').should('have.attr','name','search')
+      cy.get('input[controlid="location"]').should('have.attr','name','location')
+      cy.get('.form-row > .mt-2').within(($ul)=>{
+        cy.get("#filter-level").should('have.attr','aria-expanded','false')
+        cy.get('#filter-categories').should('have.attr','aria-expanded','false')
+        cy.get('#filter-salary_range').should('have.attr','aria-expanded','false')
+        cy.get('#filter-type').should('have.attr','aria-expanded','false')
+        cy.get('#filter-home_office').should('have.attr','aria-expanded','false')
+        cy.get('button[type="submit"]').should('have.text','Limpar')
+      })
+      cy.get('#filter-categories').click({force:true}).should('have.attr','aria-expanded','true')
+      cy.get('#qa').click({force:true})
+      cy.get('button[type="submit"]').contains('Buscar').click({force:true})
+      cy.url().should('include','/jobs?categories=qa')
+      cy.get('button[type="submit"]').contains('Limpar').click({force:true})
+      cy.get('.col-lg-7 > .input-group > .form-control').type(('Big Bang'+'{enter}').trim())
+      cy.get('.col-lg-7 > .input-group > .form-control').invoke('val').should('include','Big Bang')
+      cy.searchJob('PiedPiper')
+    });
+  });
 })
