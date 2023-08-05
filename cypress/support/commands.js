@@ -70,3 +70,29 @@ Cypress.Commands.add('cookiesClosed',()=>{
       }
     })
 })
+
+Cypress.Commands.add('signUpNewUser',()=>{
+  cy.cookiesClosed()
+  cy.getRandomUserData().then((userData)=>{
+    const user = {
+      name: userData.name,
+      email: userData.email,
+      password: userData.password,
+      country: userData.country,
+      phone: userData.phone
+    };
+    cy.addUserToList(user);
+    cy.get('#field-6').clear().type(`@#! ${user.name}`,); // só pra mostrar que não tem velidação no input de Nome completo
+    cy.get('#field-7').clear().type(`${user.email}`);
+    cy.get('#field-8').clear().type(`${user.password}`,{ parseSpecialCharSequences: false });
+    cy.intercept('GET','https://api.beta.coodesh.com/lists/companies_dashboard').as('signupRequest')
+    cy.get("#privacy-gpdr").click({force:true});
+    cy.get("#privacy-gpdr").should('have.attr','value','true');
+    cy.contains('Inscreva-se').click({force:true}).wait('@signupRequest');
+    cy.url().should('eq','https://beta.coodesh.com/onboarding/developer/profile');
+  })
+})
+
+Cypress.Commands.add('getIframe',(iframe)=>{
+  return cy.get(iframe).its('0.contentDocument.body').should('be.visible').then(cy.wrap)
+})

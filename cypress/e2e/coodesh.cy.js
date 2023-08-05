@@ -1,5 +1,7 @@
 import '../support/commands'
 
+
+
 describe('login Forms', () => {
   it('invalid_login', () => {
 
@@ -53,9 +55,118 @@ describe('login Forms', () => {
         },
       },
     }).as('signinRequest');
-    cy.get('button[type="submit"]').contains('Entrar').click()
+    cy.get('button[type="submit"]').contains('Entrar').click().wait('@signinRequest')
     cy.contains('Esqueceu sua senha?').should('be.visible')    
   }),
+
+
+  it('signup_onboardingForms_Successfull',()=>{
+    cy.visit('https://beta.coodesh.com/auth/signup/users')
+    cy.signUpNewUser();
+    cy.get("#career-frontend").should('have.attr','type','radio')
+    cy.get("#career-backend").should('have.attr','type','radio')
+    cy.get("#career-fullstack").should('have.attr','type','radio')
+    cy.get("#career-mobile").should('have.attr','type','radio')
+    cy.get("#career-devops").should('have.attr','type','radio')
+    cy.get("#career-datascience").should('have.attr','type','radio')
+    cy.get("#career-qa").should('have.attr','type','radio')
+    cy.get("#career-db").should('have.attr','type','radio')
+    cy.get("#career-cto").should('have.attr','type','radio')
+    cy.get("#career-po").should('have.attr','type','radio')
+    cy.get("#career-pm").should('have.attr','type','radio')
+    cy.get("#career-design_ui").should('have.attr','type','radio')
+    cy.get('#career-frontend').dblclick({force:true})
+    cy.get('#career-backend').dblclick({force:true})
+    cy.get("#career-qa").click({force:true})
+    cy.get('#react-select-4-input').should('have.attr','aria-autocomplete','list')
+    cy.get('#react-select-4-input').type('Python',{force:true}).wait(500).type('{downarrow} {enter}',{force:true})
+    cy.contains('Busco oportunidades para iniciar o trabalho imediatamente').should('be.visible')
+    //cy.get('#preferences.job_search').should('have.attr','mode','single')
+    cy.contains('button','Próximo').click({force:true})
+    cy.get('input[controlid="address.city"]').should('have.attr','class','form-control');
+
+    cy.getUserList().then((userList)=>{
+      var firstUser = userList[0]
+      cy.get("#displayName").should('have.attr','value',`@#! ${firstUser.name}`)
+      cy.get('#displayName').clear().type(`${firstUser.name}`);
+      cy.get('input[type="tel"]').should('have.attr','class','is-invalid form-control');
+      cy.get('input[controlid="address.city"]').click({force:true});
+      cy.get('input[type="tel"]').type(`199 ${firstUser.phone}`);
+      cy.get('input[controlid="address.city"]').should('have.attr','class','form-control is-invalid'); // campo sem validação nenhuma e não muda de classe quando tentamos enviar o form com esse input vazio, só quando clicamos nela e em outro campo e o input se encontra vazio
+      cy.get('input[controlid="address.city"]').type(`${firstUser.country}`);
+      cy.get('[id="notifications.whatsapp_notification.update_applicant"]').should('have.attr','value','0');
+      cy.get('[id="notifications.whatsapp_notification.update_applicant"]').click({force:true})
+      cy.get('[id="preferences.other_cities"]').should('have.attr','value','0')// valores desse input não são alterados mesmo depois de clicar
+      cy.get('[id="notifications.whatsapp_notification.update_applicant"]').should('have.attr','value','0');
+      cy.get('#home-office-integral').click({force:true});
+      cy.contains('button','Próximo').click({force:true});
+      cy.url().should('eq','https://beta.coodesh.com/onboarding/developer/personal')
+      cy.get('.mt-3.col > .col-12 > .react-select > .css-yk16xz-control > .css-13tza3w').click({force:true}).wait(500)
+      cy.contains('EBAC').click({force:true})
+      cy.contains('span','Rocketseat').click({force:true})
+      cy.get('#communities-0-relation').should('have.attr','placeholder','Selecione a relação com a comunidade')
+      cy.contains('span','Trybe').click({force:true})
+      cy.get('#communities-1-relation').should('have.attr','placeholder','Selecione a relação com a comunidade')
+      cy.get('#communities-0-relation').select('enthusiast')
+      cy.get('#communities-2-relation').should('have.attr','placeholder','Selecione a relação com a comunidade')
+      cy.get('#communities-1-relation').select('former_student')
+      cy.get('#communities-2-relation').select('studying')
+      cy.get('.col-lg-12 > .react-select > .css-yk16xz-control > .css-13tza3w').click({force:true})
+      cy.contains('Saúde').click({force:true})
+      cy.get('#race').select('indigenous')
+      cy.get('#gender').select('nobinary')
+      cy.get('#sexual_orientation').select('heterosexual')
+      cy.get('[id="disabilities.type"]').select('Intelectual')
+      cy.get('[id="disabilities.description"]').type('<h1>só pra testar uma paradinha aqui</h1>')
+      cy.get('[id="disabilities.cid"]').type('<button style="background-color: red;">danger?</button>')
+      cy.contains('button', 'Próximo').click({ force: true });
+
+      cy.url().should('eq', 'https://beta.coodesh.com/onboarding/developer/scorecard-intro');
+      cy.intercept('GET','https://api.beta.coodesh.com/lists/companies_dashboard').as('companiesRequest')
+      cy.wait('@companiesRequest')      
+      cy.contains('Responder agora').click({force:true})
+      cy.url().should('include','/skills?origin=onboarding').wait(5000)
+
+      cy.get(':nth-child(5) > td > .rc-slider > .rc-slider-step > [style="width: 4px; height: 18px; border-radius: 0px; transform: translateY(9px); left: 66.6667%;"]').click({force:true}).wait(5000)
+      cy.contains('button','Próximo').click({force:true}).wait(5000)
+      cy.get(':nth-child(5) > td > .rc-slider > .rc-slider-step > [style="width: 4px; height: 18px; border-radius: 0px; transform: translateY(9px); left: 33.3333%;"]').click({force:true})
+      cy.get(':nth-child(3) > td > .rc-slider > .rc-slider-step > [style="width: 4px; height: 18px; border-radius: 0px; transform: translateY(9px); left: 100%;"]').click({force:true})
+      cy.contains('Enviar').click({force:true}).wait(5000)
+      cy.url().should('eq','https://beta.coodesh.com/onboarding/developer/curriculum').wait(5000)
+      cy.intercept('GET','https://api.beta.coodesh.com/fields/users').as('curriculumLoad')
+      cy.get('.space-bottom-2 > :nth-child(1) > .col-lg-3').contains('QA / Testes').should('be.visible')
+      cy.get('.styles_skillsPrint___oa3j > :nth-child(2)').contains('p','GIT').should('be.visible')
+      cy.get('.styles_skillsPrint___oa3j > :nth-child(2)').contains('small','Praticante')
+      cy.get('.space-bottom-2 > :nth-child(1) > .col-lg-3').contains(`55199${firstUser.phone}`.slice(0,-2).replace(/\D/g,''))
+      cy.get('.space-bottom-2 > :nth-child(1) > .col-lg-3').contains(`${firstUser.email}`)
+      cy.get('.styles_skillsPrint___oa3j > :nth-child(1)').contains('p','Unit Tests').should('be.visible')
+      cy.get('.styles_skillsPrint___oa3j > :nth-child(1)').contains('small','Avançado')
+      cy.get('.styles_skillsPrint___oa3j > :nth-child(3)').contains('p','Automação de Testes')
+      cy.get('.styles_skillsPrint___oa3j > :nth-child(3)').contains('small','Básico')
+
+      cy.contains('Concluir').click({force:true}).wait(1000)
+      cy.get('.u-hamburger').click({force:true}).wait(1000)
+      cy.contains('span','Meu Painel').click({force:true})
+      cy.url().should('eq','https://beta.coodesh.com/dashboard')
+      cy.contains('button','Responder agora').click({force:true}).wait(2000)
+      cy.url().should('include','https://beta.coodesh.com/disc/').wait(1000)
+      cy.contains('button', 'Iniciar').click({force:true})
+      cy.get('button[class="btn-wide btn btn-secondary"]').should('be.visible').click({multiple:true})
+      cy.contains('button','Próximo').click({force:true})
+      cy.get('button[class="btn-wide btn btn-secondary"]').should('be.visible').click({multiple:true})
+      cy.contains('button','Enviar').click({force:true}).wait(10000)
+      cy.contains('Fechar').click({multiple:true})
+      cy.get('.u-hamburger').click({force:true}).wait(1000)
+      cy.contains('span','Minha conta').click({force:true})
+      cy.contains('span','Meu Painel').click({force:true}).wait(10000)
+
+
+
+      
+    })
+  }),
+
+
   it('user_signup', ()=>{
     cy.visit('https://beta.coodesh.com/auth/signup/users')
     cy.cookiesClosed()
@@ -93,7 +204,14 @@ describe('login Forms', () => {
     cy.get('#field-8').type(`blablabla`);
     cy.contains('Inscreva-se').click({force:true});
     cy.get('#field-8-feedback').should('have.text','Deve conter no mínimo 8 caracteres, 1 número, 1 maiúscula e 1 caractere especial');
-    cy.get('#field-6').clear();
+    //cy.get('#field-6').clear();
+    cy.getUserList().then((userList)=>{
+      const firstUser = userList[0]
+      cy.get('#field-7').clear().type(`${firstUser.email}`)
+      cy.get('#field-8').clear().type('Infinity$7')
+      cy.contains('Inscreva-se').click({force:true});
+
+    })
     cy.getRandomUserData().then((userData)=>{
       const user = {
         name: userData.name,
@@ -105,22 +223,51 @@ describe('login Forms', () => {
       cy.addUserToList(user);
       cy.get('#field-6').clear().type(`@#! ${user.name}`,); // só pra mostrar que não tem velidação no input de Nome completo
       cy.get('#field-7').clear().type(`${user.email}`);
-      cy.get('#field-8').clear().type(`${user.password}`);
-      cy.contains('Inscreva-se').click({force:true});
+      cy.get('#field-8').clear().type(`${user.password}`,{ parseSpecialCharSequences: false });
       cy.intercept('GET','https://api.beta.coodesh.com/lists/companies_dashboard').as('signupRequest')
-      cy.wait('@signupRequest')
+      cy.contains('Inscreva-se').click({force:true}).wait('@signupRequest');
       cy.url().should('eq','https://beta.coodesh.com/onboarding/developer/profile');
     })
   })
 
-  it('login_successful',()=>{
-    cy.visit('https://beta.coodesh.com/')
+/*
+  it('login_404_successful',()=>{
+    cy.visit('https://beta.coodesh.com/dashboard')
     cy.cookiesClosed()
     cy.getUserList().then((userList) => {
       const firstUser = userList[0];
       cy.get('#field-6').type(`${firstUser.email}`)
       cy.get('#field-7').type(`${firstUser.password}`)
+      cy.intercept('GET','https://api.beta.coodesh.com/lists/companies_dashboard').as('loginRequest')
+      cy.contains('Entrar').click({force:true}).wait('@loginRequest');
+      cy.url().should('eq','https://beta.coodesh.com/auth/null');
+      cy.get('.css-18bz5nv > .chakra-button').should('be.visible').click({force:true})
+      cy.get('#nav-item').each($div=>{
+        cy.wrap($div).within(()=>{
+            cy.get('a[href="/dashboard"]').within(()=>{
+              cy.contains('span','Meu Painel').should('be.visible')
+            });
+            cy.get('a[href="/account"]').within(()=>{
+              cy.contains('span','Minha conta').should('be.visible')
+            });
+            cy.get('a[href="/dashboard/applicants"]').within(()=>{
+              cy.contains('span','Candidaturas').should('be.visible')
+            });
+            cy.get('a[href="/assessments"]').within(()=>{
+              cy.contains('span','Avaliações').should('be.visible')
+            });
+            cy.get('a[href="/dashboard/resources"]').within(()=>{
+              cy.contains('span','Recursos').should('be.visible')
+            });
+            cy.get('a[href="/assessments/review"]').within(()=>{
+              cy.contains('span','Solicitar Correção').should('be.visible')
+            });
+            
+
+        })
+      });
+
       
     })
-  })
+  })*/
 })
